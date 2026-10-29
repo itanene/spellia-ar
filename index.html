@@ -518,6 +518,17 @@ document.getElementById("replayBtn").addEventListener("click", () => {
 const zukan = document.getElementById("zukan");
 document.getElementById("zukanBtn").addEventListener("click", () => { zukan.style.display = "flex"; });
 document.getElementById("zukanClose").addEventListener("click", () => { zukan.style.display = "none"; });
+// ?card=09 で開かれたら、天秤エフェクトを自動で再生する（ダイレクトQR用）
+if (new URLSearchParams(location.search).get("card") === "09") {
+  mode = "demo";
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("bar").style.display = "flex";
+  startAt = performance.now();
+  boomed = { a: false, b: false };
+  dragonVid.play().catch(function() {});
+  started = true; playing = true;
+  requestAnimationFrame(drawFrame);
+}
 </script>
 </body>
 </html>
