@@ -173,14 +173,18 @@ const QR_FRAC = { x: 114 / 968, y: 1004 / 1288, w: 146 / 968 };
 function isTenbin(data) { return data === "SPELLIA:09" || data.indexOf("SPELLIA:09") >= 0 || data.indexOf("card=09") >= 0; }
 function scanTenbin(now) {
   frameCount++;
-  if (frameCount % 2) return;
   if (cam.readyState < 2) return;
   const vw = cam.videoWidth, vh = cam.videoHeight;
-  const sw = Math.min(vw, 820), sh = Math.round(vh * sw / vw);
+  const sw = Math.min(vw, 1280), sh = Math.round(vh * sw / vw);
   if (scanC.width !== sw) { scanC.width = sw; scanC.height = sh; }
   scanX.drawImage(cam, 0, 0, sw, sh);
   let found = null;
-  try { const img = scanX.getImageData(0, 0, sw, sh); found = jsQR(img.data, sw, sh, { inversionAttempts: "dontInvert" }); } catch (e) { found = null; }
+  try { const img = scanX.getImageData(0, 0, sw, sh); found = jsQR(img.data, sw, sh, { inversionAttempts: "attemptBoth" }); } catch (e) { found = null; }
+  if (found && !isTenbin(found.data)) {
+    const hint = document.getElementById("camHint");
+    hint.style.display = "block";
+    hint.textContent = "別のQRを読んだよ（" + String(found.data).slice(0, 28) + "）。天秤カードのQRを映してね";
+  }
   if (found && isTenbin(found.data)) {
     const sc = Math.max(W / vw, H / vh), ox = (W - vw * sc) / 2, oy = (H - vh * sc) / 2;
     const L = found.location;
@@ -489,7 +493,7 @@ document.getElementById("startBtn").addEventListener("click", async () => {
   const err = document.getElementById("err");
   err.textContent = "";
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
     cam.srcObject = stream;
     await cam.play();
     mode = "camera";
