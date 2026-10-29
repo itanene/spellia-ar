@@ -56,7 +56,7 @@
   <h2>― 天秤 ―</h2>
   <p>天秤カードのQRを読み取るテスト版だよ<br>音も出るので、音量に気をつけてね</p>
   <button id="startBtn">カメラで天秤QRを見る</button>
-  <button id="demoBtn" class="sub">カードの絵で見る（デモ）</button>
+  <button id="demoBtn" class="sub">エフェクトだけ見る</button>
   <p id="err"></p>
 </div>
 
@@ -241,13 +241,7 @@ function drawFrame(now) {
   const cx = cardX + cw / 2, cy = cardY + ch * 0.40;
   const unit = cw / 700;
 
-  // カード本体（デモの時だけ絵を描く）
-  if (mode === "demo") {
-    ctx.save();
-    ctx.shadowColor = "rgba(120,200,255,.55)"; ctx.shadowBlur = 42;
-    if (imgs.card.complete) ctx.drawImage(imgs.card, cardX, cardY, cw, ch);
-    ctx.restore();
-  }
+  // カードの絵は描かない（実物のカード＋カメラ映像が本物、エフェクトだけを重ねる）
 
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
@@ -518,16 +512,11 @@ document.getElementById("replayBtn").addEventListener("click", () => {
 const zukan = document.getElementById("zukan");
 document.getElementById("zukanBtn").addEventListener("click", () => { zukan.style.display = "flex"; });
 document.getElementById("zukanClose").addEventListener("click", () => { zukan.style.display = "none"; });
-// ?card=09 で開かれたら、天秤エフェクトを自動で再生する（ダイレクトQR用）
+// ?card=09 で開かれたら、実物のカードにかざすカメラ案内にする（ダイレクトQR用）
 if (new URLSearchParams(location.search).get("card") === "09") {
-  mode = "demo";
-  document.getElementById("startScreen").style.display = "none";
-  document.getElementById("bar").style.display = "flex";
-  startAt = performance.now();
-  boomed = { a: false, b: false };
-  dragonVid.play().catch(function() {});
-  started = true; playing = true;
-  requestAnimationFrame(drawFrame);
+  document.querySelector("#startScreen p").innerHTML = "実物の天秤カードを用意してね<br>ボタンを押したら、カードのQRをカメラに映してね";
+  document.getElementById("startBtn").textContent = "カメラで実物のカードにかざす";
+  document.getElementById("demoBtn").style.display = "none";
 }
 </script>
 </body>
